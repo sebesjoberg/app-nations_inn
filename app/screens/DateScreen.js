@@ -118,13 +118,17 @@ function DateScreen() {
     }
   };
   function capitalizer(string) {
-    const arr = string.split(" ");
-    for (var i = 0; i < arr.length; i++) {
-      arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
-    }
-    string = arr.join(" ");
+    if (string) {
+      const arr = string.split(" ");
+      for (var i = 0; i < arr.length; i++) {
+        arr[i] = arr[i].charAt(0).toUpperCase() + arr[i].slice(1);
+      }
 
-    return string;
+      string = arr.join(" ");
+
+      return string;
+    }
+    return "";
   }
   function eventTime(date) {
     return date.slice(11, 16);
@@ -164,7 +168,7 @@ function DateScreen() {
         }
       }
     } catch {
-      return "";
+      return "hi";
     }
   }
 
@@ -185,7 +189,7 @@ function DateScreen() {
           <View style={styles.eventTextContainer}>
             <Text numberOfLines={2} style={styles.rubricFlatList}>
               {" "}
-              {item.title}{" "}
+              {item.title.replace("  ", " ")}{" "}
             </Text>
             <Text numberOfLines={1} style={styles.text}>
               {" "}
@@ -236,7 +240,7 @@ function DateScreen() {
             <View style={styles.eventTextContainer}>
               <Text numberOfLines={1} style={styles.rubric}>
                 {" "}
-                {currentEvent.title}{" "}
+                {currentEvent.title.replace("  ", " ")}{" "}
               </Text>
               <Text numberOfLines={1} style={styles.text}>
                 {" "}
