@@ -5,7 +5,7 @@ import {
 } from "@expo-google-fonts/raleway";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-
+import * as SQLite from "expo-sqlite";
 import Navigation from "./app/routes/tabNav";
 import { useCallback, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
@@ -32,6 +32,16 @@ export default function App() {
     Raleway_600SemiBold: Raleway_600SemiBold,
     //Main headlines
     Raleway_700Bold: Raleway_700Bold,
+  });
+  // db init and so on
+  const db = SQLite.openDatabase("db.sqlite3");
+  db.transaction((tx) => {
+    tx.executeSql(
+      "CREATE TABLE IF NOT EXISTS Nation (id INTEGER PRIMARY KEY, name TEXT, description TEXT, facebook_link TEXT, site_link TEXT, latitude REAL, longitude REAL, address TEXT, logo TEXT, marker TEXT"
+    );
+    tx.executeSql(
+      "CREATE TABLE IF NOT EXISTS Event (id INTEGER PRIMARY KEY, title TEXT, starttime TEXT, endtime TEXT, location TEXT, link TEXT, description TEXT, nation INTEGER, FOREIGN KEY(nation) REFERENCES nation(id)"
+    );
   });
 
   useEffect(() => {
