@@ -11,6 +11,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import Modal from "react-native-modal";
 import { format, formatRelative, parseISO } from "date-fns";
 import { en, sv } from "date-fns/locale";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   StyleSheet,
   Text,
@@ -22,7 +23,6 @@ import {
   FlatList,
   Animated,
   Pressable,
-  Alert,
 } from "react-native";
 
 function EventScreen() {
@@ -31,11 +31,9 @@ function EventScreen() {
   const refCards = useRef(null);
 
   const navigation = useNavigation();
-
-  const [data, setData] = useState();
+  const [api] = useGlobalState("api");
   const [currentIndex] = useGlobalState("currentIndex");
   const [state] = useGlobalState("initialMapState");
-  //const [markers, setMarkers] = useState(route.params.markers);
 
   const [isModalVisible, setIsModalVisible] = React.useState(false);
   const [currentEvent, setCurrentEvent] = React.useState({
@@ -59,23 +57,16 @@ function EventScreen() {
       setIsModalVisible(() => true);
     }
   };
-  function fetchData() {
-    fetch(
-      "https://backendnationsinn.herokuapp.com/api/list/?nation=" +
-        state.cards[currentIndex].title,
-      {
-        method: "GET",
-      }
-    )
-      .then((resp) => resp.json())
-      .then((data) => {
-        setData(data);
-      })
-      .catch((error) => console.log(error));
-  }
+  const { isLoading, error, data } = useQuery({
+    queryKey: [currentIndex],
+    queryFn: () =>
+      fetch(api + "/api/list/?nation=" + state.cards[currentIndex].title).then(
+        (res) => res.json()
+      ),
+  });
+
   useFocusEffect(
     React.useCallback(() => {
-      fetchData();
       refCards.current.scrollTo({
         x: currentIndex * Dimensions.get("window").width,
         y: 0,
@@ -149,7 +140,8 @@ function EventScreen() {
           return format(event, options, { locale: en });
         }
       }
-    } catch {
+    } catch (e) {
+      console.log(e);
       return "";
     }
   }

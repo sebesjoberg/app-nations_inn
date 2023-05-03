@@ -4,7 +4,8 @@ import Header from "../models/header";
 import { format, formatRelative, parseISO } from "date-fns";
 import { en, sv } from "date-fns/locale";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useQuery } from "@tanstack/react-query";
+import { setGlobalState, useGlobalState } from "../state";
 import "../assets/i18n/i18n";
 import { useTranslation } from "react-i18next";
 
@@ -24,11 +25,8 @@ import {
 
 function DateScreen() {
   const { t, i18n } = useTranslation();
-
-  const [eventData, setEventData] = useState();
-  //maybe currentDate should be -1 if its between 00 and 04?
+  const [api] = useGlobalState("api");
   const [currentDate, setCurrentDate] = useState(new Date());
-  var date = currentDate.toLocaleDateString();
   const [daysAhead, setDaysAhead] = useState(0);
   const [currentEvent, setCurrentEvent] = React.useState({
     description: "",
@@ -42,6 +40,15 @@ function DateScreen() {
     logo: "",
   });
 
+  const { isLoading, error, data } = useQuery({
+    queryKey: [currentDate.toLocaleDateString().split("T")[0]],
+    queryFn: () =>
+      fetch(
+        api +
+          "/api/list/?starttime=" +
+          currentDate.toLocaleDateString().split("T")[0]
+      ).then((res) => res.json()),
+  });
   const [isModalVisible, setIsModalVisible] = React.useState(false);
 
   const closeModal = () => {
@@ -87,21 +94,6 @@ function DateScreen() {
       return <Text>Error loading link</Text>;
     }
   };
-
-  useEffect(() => {
-    fetch(
-      "https://backendnationsinn.herokuapp.com/api/list/?starttime=" + date,
-      {
-        // add your Wireless LAN adapter Wi-Fi: IPv4 Address to run on localhost
-        method: "GET",
-      }
-    )
-      .then((resp) => resp.json())
-      .then((data) => {
-        setEventData(data);
-      })
-      .catch((error) => console.log(error));
-  }, [currentDate]);
 
   const nextDate = () => {
     let date = new Date();
@@ -273,7 +265,7 @@ function DateScreen() {
         <View style={{ flex: 1 }}>
           <FlatList
             contentContainerStyle={styles.eventWindow}
-            data={eventData}
+            data={data}
             renderItem={({ item }) => {
               return renderData(item);
             }}
